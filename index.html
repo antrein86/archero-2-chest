@@ -4,7 +4,178 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chest Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.game-container {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.game-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.game-right {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-width: 200px;
+}
+
+.chest-section {
+    text-align: center;
+}
+
+.chest {
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 1rem;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.3s ease;
+}
+
+.chest.silver {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="20" y="30" width="60" height="50" fill="%23C0C0C0" stroke="%23808080" stroke-width="4"/><rect x="30" y="50" width="40" height="5" fill="%23808080"/></svg>');
+}
+
+.chest.gold {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="20" y="30" width="60" height="50" fill="%23FFD700" stroke="%23DAA520" stroke-width="4"/><rect x="30" y="50" width="40" height="5" fill="%23DAA520"/></svg>');
+}
+
+.chest.legendary {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="20" y="30" width="60" height="50" fill="%23FF4500" stroke="%23B22222" stroke-width="4"/><rect x="30" y="50" width="40" height="5" fill="%23B22222"/></svg>');
+}
+
+.chest.enhanced::after {
+    content: '✨';
+    position: absolute;
+    font-size: 72px;
+    transform: translate(90px, -30px);
+}
+
+.chest.opened {
+    transform: scale(1.1);
+}
+
+.chest-counters {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+.counter {
+    background-color: white;
+    padding: 0.8rem 1rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.cell {
+    width: 80px;
+    height: 80px;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    transition: background-color 0.3s ease;
+}
+
+.cell:hover {
+    background-color: #d0d0d0;
+}
+
+.cell.revealed {
+    cursor: default;
+}
+
+.cell.revealed[data-resource="key"]::after {
+    content: '🔑';
+}
+
+.cell.revealed[data-resource="rarity"]::after {
+    content: '⭐';
+}
+
+.cell.revealed[data-resource="content"]::after {
+    content: '💎';
+}
+
+.stats {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.stats h3 {
+    margin-bottom: 0.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.stats div {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    background-color: white;
+    border-radius: 5px;
+}
+
+#restart {
+    padding: 0.8rem 1.5rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+#restart:hover {
+    background-color: #45a049;
+}
+
+.hidden {
+    display: none;
+}
+    </style>
 </head>
 <body>
     <div class="game-container">
@@ -44,6 +215,187 @@
             <button id="restart" class="hidden">Start New Game</button>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script>
+class ChestGame {
+    constructor() {
+        this.stats = {
+            chestsOpened: 0,
+            keysFound: 0,
+            rarityUpgradesFound: 0,
+            contentUpgradesFound: 0
+        };
+        
+        this.currentGame = {
+            keys: 0,
+            rarityUpgrades: 0,
+            contentUpgrades: 0,
+            revealedCells: 0
+        };
+
+        this.rarityLevels = ['silver', 'gold', 'legendary'];
+        this.currentRarityIndex = 0;
+        this.contentEnhanceLevel = 0;
+        
+        this.initializeElements();
+        this.setupEventListeners();
+        this.distributeResources();
+        this.updateUI();
+    }
+
+    initializeElements() {
+        this.cells = Array.from(document.querySelectorAll('.cell'));
+        this.chest = document.querySelector('.chest');
+        this.restartButton = document.getElementById('restart');
+        this.counters = {
+            keys: document.querySelector('.counter.keys'),
+            rarity: document.querySelector('.counter.rarity'),
+            content: document.querySelector('.counter.content')
+        };
+        this.statsElements = {
+            chestsOpened: document.getElementById('chests-opened'),
+            totalKeys: document.getElementById('total-keys'),
+            totalRarity: document.getElementById('total-rarity'),
+            totalContent: document.getElementById('total-content')
+        };
+    }
+
+    setupEventListeners() {
+        this.cells.forEach(cell => {
+            cell.addEventListener('click', () => this.handleCellClick(cell));
+        });
+        this.restartButton.addEventListener('click', () => this.resetGame());
+    }
+
+    distributeResources() {
+        this.cells.forEach(cell => {
+            cell.className = 'cell';
+            cell.removeAttribute('data-resource');
+        });
+
+        const cellIndices = Array.from({ length: 9 }, (_, i) => i);
+        this.shuffle(cellIndices);
+
+        for (let i = 0; i < 2; i++) {
+            const index = cellIndices[i];
+            this.cells[index].setAttribute('data-resource', 'key');
+        }
+
+        for (let i = 2; i < 9; i++) {
+            const index = cellIndices[i];
+            const random = Math.random();
+            
+            if (random < 0.35) {
+                this.cells[index].setAttribute('data-resource', 'key');
+            } else if (random < 0.675) {
+                this.cells[index].setAttribute('data-resource', 'rarity');
+            } else {
+                this.cells[index].setAttribute('data-resource', 'content');
+            }
+        }
+    }
+
+    handleCellClick(cell) {
+        if (cell.classList.contains('revealed')) return;
+
+        cell.classList.add('revealed');
+        this.currentGame.revealedCells++;
+
+        const resource = cell.getAttribute('data-resource');
+        this.collectResource(resource);
+        this.updateUI();
+
+        if (this.currentGame.keys >= 2) {
+            this.openChest();
+        }
+    }
+
+    collectResource(resource) {
+        switch (resource) {
+            case 'key':
+                this.currentGame.keys++;
+                this.stats.keysFound++;
+                break;
+            case 'rarity':
+                this.currentGame.rarityUpgrades++;
+                this.stats.rarityUpgradesFound++;
+                if (this.currentGame.rarityUpgrades >= 2 && this.currentRarityIndex < this.rarityLevels.length - 1) {
+                    this.currentGame.rarityUpgrades = 0;
+                    this.currentRarityIndex++;
+                }
+                break;
+            case 'content':
+                this.currentGame.contentUpgrades++;
+                this.stats.contentUpgradesFound++;
+                if (this.currentGame.contentUpgrades >= 2) {
+                    this.currentGame.contentUpgrades = 0;
+                    this.contentEnhanceLevel++;
+                }
+                break;
+        }
+    }
+
+    updateUI() {
+        this.counters.keys.textContent = `Keys: ${this.currentGame.keys}/2`;
+        this.counters.rarity.textContent = `Rarity Upgrades: ${this.currentGame.rarityUpgrades}/2`;
+        this.counters.content.textContent = `Content Upgrades: ${this.currentGame.contentUpgrades}/2`;
+
+        this.chest.className = 'chest ' + this.rarityLevels[this.currentRarityIndex];
+        if (this.contentEnhanceLevel > 0) {
+            this.chest.classList.add('enhanced');
+        }
+
+        this.statsElements.chestsOpened.textContent = this.stats.chestsOpened;
+        this.statsElements.totalKeys.textContent = this.stats.keysFound;
+        this.statsElements.totalRarity.textContent = this.stats.rarityUpgradesFound;
+        this.statsElements.totalContent.textContent = this.stats.contentUpgradesFound;
+    }
+
+    openChest() {
+        this.chest.classList.add('opened');
+        this.stats.chestsOpened++;
+        this.restartButton.classList.remove('hidden');
+        
+        this.cells.forEach(cell => {
+            if (!cell.classList.contains('revealed')) {
+                cell.style.pointerEvents = 'none';
+            }
+        });
+    }
+
+    resetGame() {
+        this.currentGame = {
+            keys: 0,
+            rarityUpgrades: 0,
+            contentUpgrades: 0,
+            revealedCells: 0
+        };
+        
+        this.currentRarityIndex = 0;
+        this.contentEnhanceLevel = 0;
+        
+        this.chest.className = 'chest silver';
+        this.restartButton.classList.add('hidden');
+        
+        this.cells.forEach(cell => {
+            cell.style.pointerEvents = '';
+        });
+        
+        this.distributeResources();
+        this.updateUI();
+    }
+
+    shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new ChestGame();
+});
+    </script>
 </body>
 </html>
