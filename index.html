@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chest Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-left">
+            <div class="chest-section">
+                <div class="chest silver"></div>
+            </div>
+
+            <div class="grid">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+            </div>
+        </div>
+
+        <div class="game-right">
+            <div class="chest-counters">
+                <div class="counter keys">Keys: 0/2</div>
+                <div class="counter rarity">Rarity Upgrades: 0/2</div>
+                <div class="counter content">Content Upgrades: 0/2</div>
+            </div>
+
+            <div class="stats">
+                <h3>Statistics</h3>
+                <div>Chests Opened: <span id="chests-opened">0</span></div>
+                <div>Total Keys Found: <span id="total-keys">0</span></div>
+                <div>Total Rarity Upgrades: <span id="total-rarity">0</span></div>
+                <div>Total Content Upgrades: <span id="total-content">0</span></div>
+            </div>
+
+            <button id="restart" class="hidden">Start New Game</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
