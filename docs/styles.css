@@ -41,32 +41,37 @@ body {
 }
 
 .chest {
-    width: 300px;  /* Made 3x larger */
-    height: 300px; /* Made 3x larger */
+    width: 300px;
+    height: 300px;
     margin: 0 auto 1rem;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transition: transform 0.3s ease;
+    position: relative;
 }
 
-.chest.silver {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="20" y="30" width="60" height="50" fill="%23C0C0C0" stroke="%23808080" stroke-width="4"/><rect x="30" y="50" width="40" height="5" fill="%23808080"/></svg>');
+.chest.common {
+    background-image: url('./chest_common.png');
 }
 
-.chest.gold {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="20" y="30" width="60" height="50" fill="%23FFD700" stroke="%23DAA520" stroke-width="4"/><rect x="30" y="50" width="40" height="5" fill="%23DAA520"/></svg>');
+.chest.rare {
+    background-image: url('./chest_rare.png');
+}
+
+.chest.epic {
+    background-image: url('./chest_epic.png');
 }
 
 .chest.legendary {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="20" y="30" width="60" height="50" fill="%23FF4500" stroke="%23B22222" stroke-width="4"/><rect x="30" y="50" width="40" height="5" fill="%23B22222"/></svg>');
+    background-image: url('./chest_legendary.png');
 }
 
 .chest.enhanced::after {
     content: '✨';
     position: absolute;
-    font-size: 72px; /* Increased for larger chest */
-    transform: translate(90px, -30px); /* Adjusted for larger chest */
+    font-size: 72px;
+    transform: translate(90px, -30px);
 }
 
 .chest.opened {
@@ -115,18 +120,21 @@ body {
 
 .cell.revealed {
     cursor: default;
+    background-size: 60%;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-.cell.revealed[data-resource="key"]::after {
-    content: '🔑';
+.cell.revealed[data-resource="key"] {
+    background-image: url('./key_transparent.png');
 }
 
-.cell.revealed[data-resource="rarity"]::after {
-    content: '⭐';
+.cell.revealed[data-resource="rarity"] {
+    background-image: url('./upgrade_transparent.png');
 }
 
-.cell.revealed[data-resource="content"]::after {
-    content: '💎';
+.cell.revealed[data-resource="content"] {
+    background-image: url('./x2_multiplier_transparent.png');
 }
 
 .stats {

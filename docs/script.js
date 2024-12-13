@@ -14,7 +14,7 @@ class ChestGame {
             revealedCells: 0
         };
 
-        this.rarityLevels = ['silver', 'gold', 'legendary'];
+        this.rarityLevels = ['common', 'rare', 'epic', 'legendary'];
         this.currentRarityIndex = 0;
         this.contentEnhanceLevel = 0;
         
@@ -49,32 +49,26 @@ class ChestGame {
     }
 
     distributeResources() {
-        // Reset cells
         this.cells.forEach(cell => {
             cell.className = 'cell';
             cell.removeAttribute('data-resource');
         });
 
-        // Ensure at least 2 keys
         const cellIndices = Array.from({ length: 9 }, (_, i) => i);
         this.shuffle(cellIndices);
 
-        // Place 2 guaranteed keys
         for (let i = 0; i < 2; i++) {
             const index = cellIndices[i];
             this.cells[index].setAttribute('data-resource', 'key');
         }
 
-        // Distribute remaining resources with weighted probability
         for (let i = 2; i < 9; i++) {
             const index = cellIndices[i];
             const random = Math.random();
             
-            // 35% chance for keys (reduced from 50%)
-            // 32.5% for rarity and 32.5% for content (increased from 25% each)
             if (random < 0.35) {
                 this.cells[index].setAttribute('data-resource', 'key');
-            } else if (random < 0.675) { // 0.35 + 0.325
+            } else if (random < 0.675) {
                 this.cells[index].setAttribute('data-resource', 'rarity');
             } else {
                 this.cells[index].setAttribute('data-resource', 'content');
@@ -123,18 +117,15 @@ class ChestGame {
     }
 
     updateUI() {
-        // Update counters
         this.counters.keys.textContent = `Keys: ${this.currentGame.keys}/2`;
         this.counters.rarity.textContent = `Rarity Upgrades: ${this.currentGame.rarityUpgrades}/2`;
         this.counters.content.textContent = `Content Upgrades: ${this.currentGame.contentUpgrades}/2`;
 
-        // Update chest appearance
         this.chest.className = 'chest ' + this.rarityLevels[this.currentRarityIndex];
         if (this.contentEnhanceLevel > 0) {
             this.chest.classList.add('enhanced');
         }
 
-        // Update statistics
         this.statsElements.chestsOpened.textContent = this.stats.chestsOpened;
         this.statsElements.totalKeys.textContent = this.stats.keysFound;
         this.statsElements.totalRarity.textContent = this.stats.rarityUpgradesFound;
@@ -146,7 +137,6 @@ class ChestGame {
         this.stats.chestsOpened++;
         this.restartButton.classList.remove('hidden');
         
-        // Disable remaining cells
         this.cells.forEach(cell => {
             if (!cell.classList.contains('revealed')) {
                 cell.style.pointerEvents = 'none';
@@ -165,7 +155,7 @@ class ChestGame {
         this.currentRarityIndex = 0;
         this.contentEnhanceLevel = 0;
         
-        this.chest.className = 'chest silver';
+        this.chest.className = 'chest common';
         this.restartButton.classList.add('hidden');
         
         this.cells.forEach(cell => {
@@ -185,7 +175,6 @@ class ChestGame {
     }
 }
 
-// Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     new ChestGame();
 });
